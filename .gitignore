@@ -1,0 +1,3 @@
+*.o
+./volt
+.ycm_extra_conf.py
