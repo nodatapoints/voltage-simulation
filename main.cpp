@@ -15,13 +15,24 @@ void handleEvent(sf::Event& e, sf::Window& w) {
 }
 
 template<GLenum bufferType, typename T>
-void initSSBO(GLuint target, GLuint binding, GLsizei size, GLenum type, const T value) {
-    glBindBuffer(bufferType, target);
-    glBufferData(bufferType, size*sizeof(T), nullptr, GL_STATIC_DRAW);
+class BufferObject {
+public:
+    GLuint handle;
+    BufferObject(GLuint binding, GLsizei size, GLenum type, const T value) {
+        handle = binding;
 
-    glClearBufferData(bufferType, GL_R32F, GL_RED, type, &value);
-    glBindBufferBase(bufferType, binding, target);
-}
+        glGenBuffers(1, &handle); 
+        glBindBuffer(bufferType, handle);
+
+        glBufferData(bufferType, size*sizeof(T), nullptr, GL_STATIC_DRAW);
+        glClearBufferData(bufferType, GL_R32F, GL_RED, type, &value);
+
+        glBindBufferBase(bufferType, binding, handle);
+    }
+    ~BufferObject() { glDeleteBuffers(1, &handle); }
+    operator GLuint() { return handle; }
+};
+
 
 int main(int , char* []) {
     // CONSTANTS
@@ -102,18 +113,10 @@ int main(int , char* []) {
     glEnableVertexAttribArray(main);
     glVertexAttribPointer(main, 2, GL_FLOAT, GL_FALSE, 0, 0);    
 
-    struct {
-        GLuint potential;
-        GLuint initialPotential;
-        GLuint isStatic;
-        GLuint isStaticUniform;
-    } buffers;
-    glGenBuffers(sizeof(buffers)/sizeof(GLuint), (GLuint*) &buffers);
-
     int nPixels = window.getSize().x * window.getSize().y;
 
-    initSSBO<GL_SHADER_STORAGE_BUFFER>(buffers.potential, 3, 2*nPixels, GL_FLOAT, 0.0f);
-    initSSBO<GL_SHADER_STORAGE_BUFFER>(buffers.isStatic, 4, nPixels, GL_BOOL, 0);
+    BufferObject<GL_SHADER_STORAGE_BUFFER, float> potential(3, 2*nPixels, GL_FLOAT, 0.0f);
+    BufferObject<GL_SHADER_STORAGE_BUFFER, int> isStatic(4, nPixels, GL_BOOL, 0);
 
     // MAIN LOOP
     int compute_count, current_tick = -1;
@@ -125,6 +128,7 @@ int main(int , char* []) {
     glBindVertexArray(vaos[shapePos]);
 
     glDrawArrays(GL_TRIANGLES, 0, shapeVertices.size());
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     while (window.isOpen()) {
         while (window.pollEvent(event))
