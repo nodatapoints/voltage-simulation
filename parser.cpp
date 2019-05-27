@@ -17,3 +17,13 @@ std::vector<PointData> parseFile(const std::string& filename) {
 	}
 	throw errno;
 }
+
+float getBound(const std::vector<PointData> &vertices) {
+	float min = 0, max = 0;
+
+	for (const auto& vertex : vertices) {
+		min = std::min(min, vertex.potential);
+		max = std::max(max, vertex.potential);
+	}
+	return std::max(std::abs(min), std::abs(max));
+}

@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <tuple>
 
 struct PointData {
 	float potential;
@@ -10,3 +11,5 @@ struct PointData {
 };
 
 std::vector<PointData> parseFile(const std::string& filename); 
+float getBound(const std::vector<PointData> &vertices);
+

@@ -7,6 +7,7 @@ layout(std430, binding=3) buffer b1 {
 };
 
 uniform ivec2 windowSize;
+uniform float bound;
 uniform int tick;
 uniform int nPixels;
 
@@ -272,7 +273,8 @@ const vec3 cmap[] = {
 };
 
 void main() {
-	int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
-    color.rgb = cmap[ int((data[(1-tick)*nPixels+id]/2+.5) * 255) ];
+	const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
+	const float value = data[(1-tick)*nPixels+id];
+    color.rgb = cmap[ int((value/bound/2+.5) * 255) ];
 	color.a = 1.0f;
 }

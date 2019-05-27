@@ -58,6 +58,7 @@ void initMainProgram() {
 	uniforms.main.windowSize = glGetUniformLocation(programs.main, "windowSize");
 	uniforms.main.tick = glGetUniformLocation(programs.main, "tick");
 	uniforms.main.nPixels = glGetUniformLocation(programs.main, "nPixels");
+	uniforms.main.bound = glGetUniformLocation(programs.main, "bound");
 }
 
 void initShapeProgram() {

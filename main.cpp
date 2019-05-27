@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     };
 
 	auto shapeVertices = parseFile(argv[1]);
+	auto bound = getBound(shapeVertices);
 
 	initMainProgram();
 	initShapeProgram();
@@ -79,6 +80,7 @@ int main(int argc, char *argv[]) {
 			window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.main.nPixels, nPixels);
         glUniform1i(uniforms.main.tick, current_tick % 2);
+		glUniform1f(uniforms.main.bound, bound);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
         glBindVertexArray(vaos[mainPos]);

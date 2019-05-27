@@ -15,7 +15,7 @@ struct {
 		GLuint nPixels, windowSize, tick, alpha;
 	} compute;
 	struct {
-		GLuint nPixels, windowSize, tick;
+		GLuint nPixels, windowSize, tick, bound;
 	} shape, main;
 } uniforms;
 
