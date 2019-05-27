@@ -275,6 +275,6 @@ const vec3 cmap[] = {
 void main() {
 	const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
 	const float value = data[(1-tick)*nPixels+id];
-    color.rgb = cmap[ int((value/bound/2+.5) * 255) ];
+    color.rgb = cmap[ int((sign(value)*pow(abs(value/bound), .75)/2+.5) * 255) ];
 	color.a = 1.0f;
 }
