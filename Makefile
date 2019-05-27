@@ -7,7 +7,7 @@ LIBRARIES=-lsfml-graphics -lsfml-window -lsfml-system -lGL -lGLEW
 ${APP}: main.o shaderUtils.o
 	g++ ${GPP_FLAGS} -o ${APP} *.o ${LIBRARIES} 
 
-main.o: main.cpp
+main.o: main.cpp glUtils.inl
 	g++ ${GPP_FLAGS} -c main.cpp
 
 shaderUtils.o: shaderUtils.cpp shaderUtils.hpp
