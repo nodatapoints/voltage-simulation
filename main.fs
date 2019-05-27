@@ -2,8 +2,8 @@
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
-layout(std430, binding = 3) buffer b1 {
-  float data[];
+layout(std430, binding=3) buffer b1 {
+    readonly float data[];
 };
 
 uniform ivec2 winsize;
@@ -272,7 +272,7 @@ const vec3 cmap[] = {
 };
 
 void main() {
-  int id = int(gl_FragCoord.y * winsize.x + gl_FragCoord.x);
-  color.rgb = cmap[ int(data[(1-tick)*pixcount+id] * 255) ];
-  color.a = 1.0f;
+	int id = int(gl_FragCoord.y * winsize.x + gl_FragCoord.x);
+    color.rgb = cmap[ int((data[(1-tick)*pixcount+id]/2+.5) * 255) ];
+	color.a = 1.0f;
 }

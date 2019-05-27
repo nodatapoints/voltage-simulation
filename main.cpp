@@ -14,13 +14,63 @@ void handleEvent(sf::Event& e, sf::Window& w) {
         w.close();
 }
 
+template<GLenum bufferType, typename T>
+class BufferObject {
+public:
+    GLuint handle;
+    BufferObject(GLuint binding, GLsizei size, GLenum type, const T value) {
+        handle = binding;
+
+        glGenBuffers(1, &handle);
+        glBindBuffer(bufferType, handle);
+
+        glBufferData(bufferType, size*sizeof(T), nullptr, GL_STATIC_DRAW);
+        glClearBufferData(bufferType, GL_R32F, GL_RED, type, &value);
+
+        glBindBufferBase(bufferType, binding, handle);
+    }
+    ~BufferObject() { glDeleteBuffers(1, &handle); }
+    operator GLuint() { return handle; }
+};
+
+enum {mainPos, shapePos, shapePotential, _nVbos};
+GLuint vbos[_nVbos];
+GLuint vaos[_nVbos];
+
+struct PointData {
+	float potential;
+	float position[2];
+};
+
+void initShapeVertexArrays(const std::vector<PointData> &shapeVertices) {
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[shapePos]);
+    glBufferData(GL_ARRAY_BUFFER, shapeVertices.size()*sizeof(PointData), shapeVertices.data(), GL_STATIC_DRAW);
+
+    glBindVertexArray(vaos[shapePos]);
+
+    glVertexAttribPointer(shapePotential, 1, GL_FLOAT, GL_FALSE, sizeof(PointData), 0);
+    glVertexAttribPointer(shapePos, 2, GL_FLOAT, GL_FALSE, sizeof(PointData), (void*) sizeof(float));
+    glEnableVertexAttribArray(shapePos);
+    glEnableVertexAttribArray(shapePotential);
+}
+
+void initMainVertexArray(const std::vector<float> &vertices) {
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindVertexArray(vaos[mainPos]);
+
+    glVertexAttribPointer(mainPos, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(mainPos);
+}
+
 int main(int , char* []) {
     // CONSTANTS
     const int local_size = 128;
 
     // CREATE WINDOW
     sf::Window window(
-        sf::VideoMode::getDesktopMode(), "Topple GL", sf::Style::Fullscreen,
+        sf::VideoMode::getDesktopMode(), "Voltage", sf::Style::Fullscreen,
         sf::ContextSettings(8, 8, 4, 4, 4, sf::ContextSettings::Debug)
     );
     window.setMouseCursorVisible(false);
@@ -29,13 +79,19 @@ int main(int , char* []) {
     // LOAD SHADERS
     auto vert_s = loadShader("main.vs", GL_VERTEX_SHADER);
     auto frag_s = loadShader("main.fs", GL_FRAGMENT_SHADER);
-    auto comp_s = loadShader("compute.glsl", GL_COMPUTE_SHADER);
-    auto comp = linkShaders({comp_s});
     auto sp = linkShaders({vert_s, frag_s});
-
     auto winsize = glGetUniformLocation(sp, "winsize");
     auto tick = glGetUniformLocation(sp, "tick");
     auto pixcount = glGetUniformLocation(sp, "pixcount");
+
+    auto shapeVert_s = loadShader("shape.vs", GL_VERTEX_SHADER);
+    auto shapeFrag_s = loadShader("shape.fs", GL_FRAGMENT_SHADER);
+	auto shapeProg = linkShaders({shapeVert_s, shapeFrag_s});
+    auto shape_winsize = glGetUniformLocation(shapeProg, "winsize");
+    auto shape_pixcount = glGetUniformLocation(shapeProg, "pixcount");
+
+    auto comp_s = loadShader("compute.glsl", GL_COMPUTE_SHADER);
+    auto comp = linkShaders({comp_s});
     auto comp_winsize = glGetUniformLocation(comp, "comp_winsize");
     auto comp_tick = glGetUniformLocation(comp, "comp_tick");
     auto comp_pixcount = glGetUniformLocation(comp, "comp_pixcount");
@@ -49,51 +105,60 @@ int main(int , char* []) {
         1.0, 1.0
     };
 
-    GLuint vbo; glGenBuffers(1, &vbo);
-    GLuint vao; glGenVertexArrays(1, &vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	std::vector<PointData> shapeVertices = {
+        {1, {0, 0}},
+        {1, {.6, .2}},
+        {1, {-.2, .3}},
+        {-1, {.3, .4}},
+        {1, {.5, .45}},
+        {-5, {.34, .3}},
+	};
 
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);    
+    glGenBuffers(_nVbos, vbos);
+    glGenVertexArrays(_nVbos, vaos);
 
-    // SET UP SSBO
-    std::vector<float> data(2 * window.getSize().x * window.getSize().y, 0);
-    std::srand(std::time(nullptr));
-    for (auto& x : data) x = (std::rand() & ((1 << 3) - 1)) == 0; // dont actually do this.
+	initMainVertexArray(vertices);
+	initShapeVertexArrays(shapeVertices);
 
-    GLuint ssbo; glGenBuffers(1, &ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, data.size()*sizeof(float), data.data(), GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    int nPixels = window.getSize().x * window.getSize().y;
+
+    BufferObject<GL_SHADER_STORAGE_BUFFER, float> potential(3, 2*nPixels, GL_FLOAT, 0.0f);
+    BufferObject<GL_SHADER_STORAGE_BUFFER, int> isStatic(4, nPixels, GL_BOOL, 0);
 
     // MAIN LOOP
-    int current_tick = 0;
+    int compute_count, current_tick = -1;
     sf::Event event;
 
-    int pix, compute_count;
+    glUseProgram(shapeProg);
+    glUniform2i(shape_winsize, window.getSize().x, window.getSize().y);
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[shapePos]);
+    glBindVertexArray(vaos[shapePos]);
+
+    glDrawArrays(GL_TRIANGLES, 0, shapeVertices.size());
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
     while (window.isOpen()) {
         while (window.pollEvent(event))
             handleEvent(event, window);
 
-        pix = window.getSize().x * window.getSize().y;
-        compute_count = pix / 128;
+        compute_count = nPixels / 128;
 
-        glUseProgram(comp);
+		glUseProgram(comp);
         glUniform2i(comp_winsize, window.getSize().x, window.getSize().y);
-        glUniform1i(comp_pixcount, pix);
+        glUniform1i(comp_pixcount, nPixels);
         glUniform1i(comp_tick, ++current_tick % 2);
-        glUniform1f(comp_alpha, .2);
+        glUniform1f(comp_alpha, .1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glDispatchCompute(compute_count, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
         glUseProgram(sp);
         glUniform2i(winsize, window.getSize().x, window.getSize().y);
-        glUniform1i(pixcount, pix);
+        glUniform1i(pixcount, nPixels);
         glUniform1i(tick, current_tick % 2);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
+        glBindVertexArray(vaos[mainPos]);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size()/2);
 
         window.display();
