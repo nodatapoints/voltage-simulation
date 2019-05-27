@@ -3,11 +3,11 @@
 layout(local_size_x=128, local_size_y=1, local_size_z=1) in;
 
 layout(std430, binding=3) buffer b1 {
-  float data[];
-} ssbo;
+    float data[];
+};
 
 layout(std430, binding=4) buffer b2 {
-    bool isStatic[];
+    readonly bool isStatic[];
 };
 
 uniform ivec2 comp_winsize;
@@ -21,13 +21,15 @@ void main() {
     const int base = id + comp_tick*comp_pixcount;
     const int pbase = id + (1-comp_tick)*comp_pixcount;
 
-    const float average = .25*(ssbo.data[base - 1] +      //  l
-            ssbo.data[base + 1] +      //  r
-            ssbo.data[base - w] +      // u
-            ssbo.data[base + w]);
+    const float average = .25*(
+          data[base-1]
+        + data[base+1]
+        + data[base-w]
+        + data[base+w]
+    );
 
     if (isStatic[id]) 
-        ssbo.data[pbase] = ssbo.data[base];
+        data[pbase] = data[base];
     else
-        ssbo.data[pbase] = comp_alpha*ssbo.data[base] + (1-comp_alpha)*average;
+        data[pbase] = comp_alpha*data[base] + (1-comp_alpha)*average;
 }

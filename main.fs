@@ -2,8 +2,8 @@
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
-layout(std430, binding = 3) buffer b1 {
-  float data[];
+layout(std430, binding=3) buffer b1 {
+    readonly float data[];
 };
 
 uniform ivec2 winsize;
