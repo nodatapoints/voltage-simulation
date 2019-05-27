@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 
 #include "shaderUtils.hpp"
+#include "parser.hpp"
 
 template<GLenum bufferType, typename T>
 class BufferObject {
@@ -27,11 +28,6 @@ public:
 enum {mainPos, shapePos, shapePotential, _nVbos};
 GLuint vbos[_nVbos];
 GLuint vaos[_nVbos];
-
-struct PointData {
-	float potential;
-	float position[2];
-};
 
 void initShapeVertexArrays(const std::vector<PointData> &shapeVertices) {
     glBindBuffer(GL_ARRAY_BUFFER, vbos[shapePos]);

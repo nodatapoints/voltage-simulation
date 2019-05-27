@@ -6,6 +6,7 @@
 #include <SFML/Window.hpp>
 
 #include "glUtils.inl"
+#include "parser.hpp"
 
 
 void handleEvent(sf::Event& e, sf::Window& w) {
@@ -13,7 +14,11 @@ void handleEvent(sf::Event& e, sf::Window& w) {
             (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::Escape))
         w.close();
 }
-int main(int , char* []) {
+int main(int argc, char *argv[]) {
+	if (argc < 2) {
+		std::cerr << "no file specified" << std::endl;
+		return -1;
+	}
     // CONSTANTS
     const int local_size = 128;
 
@@ -26,27 +31,14 @@ int main(int , char* []) {
     init();
 
     // SET UP VERTEX BUFFER AND ARRAY
-    std::vector<float> vertices = {
+    const std::vector<float> vertices = {
         -1.0, -1.0,
         1.0, -1.0,
         -1.0, 1.0,
         1.0, 1.0
     };
 
-	std::vector<PointData> shapeVertices = {
-        {1, {0, 0}},
-        {1, {.6, .2}},
-        {.5, {-.2, .3}},
-        {-1, {.3, .4}},
-        {1, {.5, .45}},
-        {-1, {.34, .3}},
-		{-.4, {.1, .4}},
-		{-.5, {.1, .5}},
-		{0, {.0, .4}},
-		{-.5, {.1, .5}},
-		{0, {.0, .4}},
-		{1, {.1, .5}}
-	};
+	auto shapeVertices = parseFile(argv[1]);
 
 	initMainProgram();
 	initShapeProgram();
