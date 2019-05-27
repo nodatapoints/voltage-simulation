@@ -6,6 +6,18 @@
 
 #include <GL/glew.h>
 
+struct {
+	GLuint main, shape, compute;
+} programs;
+
+struct {
+	struct {
+		GLuint nPixels, windowSize, tick, alpha;
+	} compute;
+	struct {
+		GLuint nPixels, windowSize, tick;
+	} shape, main;
+} uniforms;
 
 void init();
 

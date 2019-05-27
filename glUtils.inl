@@ -1,6 +1,9 @@
 #include <vector>
 #include <cstdlib>
+#include <SFML/Window.hpp>
 #include <GL/glew.h>
+
+#include "shaderUtils.hpp"
 
 template<GLenum bufferType, typename T>
 class BufferObject {
@@ -52,3 +55,38 @@ void initMainVertexArray(const std::vector<float> &vertices) {
     glEnableVertexAttribArray(mainPos);
 }
 
+void initMainProgram() {
+	auto vert_s = loadShader("main.vs", GL_VERTEX_SHADER);
+	auto frag_s = loadShader("main.fs", GL_FRAGMENT_SHADER);
+	programs.main = linkShaders({vert_s, frag_s});
+	uniforms.main.windowSize = glGetUniformLocation(programs.main, "windowSize");
+	uniforms.main.tick = glGetUniformLocation(programs.main, "tick");
+	uniforms.main.nPixels = glGetUniformLocation(programs.main, "nPixels");
+}
+
+void initShapeProgram() {
+	auto shapeVert_s = loadShader("shape.vs", GL_VERTEX_SHADER);
+	auto shapeFrag_s = loadShader("shape.fs", GL_FRAGMENT_SHADER);
+	programs.shape = linkShaders({shapeVert_s, shapeFrag_s});
+	uniforms.shape.windowSize = glGetUniformLocation(programs.shape, "windowSize");
+	uniforms.shape.nPixels = glGetUniformLocation(programs.shape, "nPixels");
+}
+
+void initComputeProgram() {
+	auto comp_s = loadShader("compute.glsl", GL_COMPUTE_SHADER);
+	programs.compute = linkShaders({comp_s});
+	uniforms.compute.windowSize = glGetUniformLocation(programs.compute, "windowSize");
+	uniforms.compute.tick = glGetUniformLocation(programs.compute, "tick");
+	uniforms.compute.nPixels = glGetUniformLocation(programs.compute, "nPixels");
+	uniforms.compute.alpha = glGetUniformLocation(programs.compute, "alpha");
+}
+
+void drawShape(const std::vector<PointData> &shapeVertices, const sf::Window &window) {
+    glUseProgram(programs.shape);
+    glUniform2i(uniforms.shape.windowSize, window.getSize().x, window.getSize().y);
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[shapePos]);
+    glBindVertexArray(vaos[shapePos]);
+
+    glDrawArrays(GL_TRIANGLES, 0, shapeVertices.size());
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}

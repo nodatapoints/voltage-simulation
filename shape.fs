@@ -11,10 +11,10 @@ layout(std430, binding=4) buffer b2 {
 };
 
 in float potential;
-uniform ivec2 winsize;
+uniform ivec2 windowSize;
 
 void main() {
-	const int id = int(gl_FragCoord.y*winsize.x + gl_FragCoord.x);
+	const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
 	data[id] = potential;
     isStatic[id] = true;
 }
