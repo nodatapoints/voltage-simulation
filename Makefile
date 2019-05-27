@@ -17,7 +17,7 @@ parser.o: parser.cpp parser.hpp
 	g++ ${GPP_FLAGS} -c parser.cpp
 
 run: ${APP}
-	./${APP}
+	./${APP} shape.txt  # for debug purposes
 
 clean:
 	rm -rvf ${APP} *.o
