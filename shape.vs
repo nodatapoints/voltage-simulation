@@ -7,7 +7,7 @@ out float potential;
 const float scale = 10;
 
 void main() {
-	gl_Position = vec4(vP.xy/scale, 0, 1);
+    gl_Position = vec4(vP.xy/scale, 0, 1);
     potential = vPotential;
 }
 
