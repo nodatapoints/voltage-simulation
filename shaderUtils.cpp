@@ -1,8 +1,19 @@
+/* Because the khronos group was so kind to only take shader code as
+ * raw C strings instead of seperate files like any decent human being,
+ * I have to write it myself.
+ *
+ * (Or borrow it from a friend in this case)
+ *
+ * The functions pretty much to what their name says as long as you
+ * use them correctly. If you dont, they still do something, but not necessarily
+ * what they claim to do.
+ */
+
 #include "shaderUtils.hpp"
 
 void init() {
     if (glewInit() != GLEW_OK)
-        abort();
+        abort();  // dont do it if it's not ok
 }
 
 GLuint compileShader(const GLenum type, const GLchar* source, GLint length) {

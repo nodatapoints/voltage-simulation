@@ -19,6 +19,7 @@ std::vector<PointData> parseFile(const std::string& filename) {
 }
 
 float getBound(const std::vector<PointData> &vertices) {
+    /* Find the maximum absolute Potential */
     float min = 0, max = 0;
 
     for (const auto& vertex : vertices) {

@@ -1,5 +1,8 @@
 /* 
- * This is the main GL stuff file. Read at your own risk.
+ * This is the main GL stuff file, containing all the beautiful calls to
+ * the GL API and an awkward mix of C and C++ glue code.
+ *
+ * Continue reading at your own risk.
  */
 
 #include <vector>
@@ -12,7 +15,7 @@
 
 template<GLenum bufferType, typename T>
 class BufferObject {
-    /* Wrapper class to safely handle GL buffers */
+    /* Wrapper class to (somewhat) safely handle GL buffers */
 public:
     GLuint handle;
     BufferObject(GLuint binding, GLsizei size, GLenum type, const T value) {
@@ -106,3 +109,5 @@ void drawShape(const std::vector<PointData> &shapeVertices, const sf::Window &wi
     glDrawArrays(GL_TRIANGLES, 0, shapeVertices.size());
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
+
+// next time I'll use a C++ Wrapper for GL

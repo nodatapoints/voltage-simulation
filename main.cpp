@@ -16,7 +16,7 @@ void handleEvent(sf::Event& e, sf::Window& w) {
         w.close();
 }
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
+    if (argc < 2) {  // this about covers the user friendlyness of the CLI
         std::cerr << "no file specified" << std::endl;
         return -1;
     }
@@ -66,6 +66,15 @@ int main(int argc, char *argv[]) {
 
     // Initialize the SSBOs
 
+    // Note: Front and Backbuffers
+    // Is is important to update the value of each pixel __after__ computing every
+    // value. Otherwise, depending on the processing order, artefacts will emerge.
+    // This is solved by buffer ping-pong-ing:
+    // The data is stored twice, in a front and a back buffer. In one iteration, one
+    // of them is used for reading while the other is used for writing. With each
+    // iteration, the roles change. This way, there is no need to move large amounts
+    // of memory and everything can be done in-place.
+
     // In potential, the actual data is stored in a 1D row major representation
     // Potential contains the front and back buffer end to end, each nPixels in size.
     // When rendering, judging from current_tick %2 either being 0 or 1, data from the
@@ -90,7 +99,7 @@ int main(int argc, char *argv[]) {
     // Main loop
     
     // current_tick is used to determine wether to update the front or back buffer.
-    int current_tick = -1;
+    int current_tick = 0;
     sf::Event event;
     while (window.isOpen()) {
         while (window.pollEvent(event))
@@ -105,7 +114,7 @@ int main(int argc, char *argv[]) {
 
         // update front and back buffer nIterations times in an alternating manner.
         for (int i = 0; i < 20; ++i) {
-            glUniform1i(uniforms.compute.tick, ++current_tick % 2);  // update tick
+            glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
             glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
         }
@@ -122,5 +131,5 @@ int main(int argc, char *argv[]) {
 
         window.display();
     }
-    return 0;
+    return 0;  // success yay
 }

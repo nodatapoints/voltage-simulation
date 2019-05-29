@@ -6,6 +6,8 @@
 
 #include <GL/glew.h>
 
+// These beautiful helper structs define the
+// various handles for all my GL objects
 struct {
     GLuint main, shape, compute;
 } programs;
