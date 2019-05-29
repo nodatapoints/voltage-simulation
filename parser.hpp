@@ -6,8 +6,8 @@
 #include <tuple>
 
 struct PointData {
-	float potential;
-	float position[2];
+    float potential;
+    float position[2];
 };
 
 std::vector<PointData> parseFile(const std::string& filename); 

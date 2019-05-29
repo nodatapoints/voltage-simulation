@@ -6,17 +6,19 @@
 
 #include <GL/glew.h>
 
+// These beautiful helper structs define the
+// various handles for all my GL objects
 struct {
-	GLuint main, shape, compute;
+    GLuint main, shape, compute;
 } programs;
 
 struct {
-	struct {
-		GLuint nPixels, windowSize, tick, alpha;
-	} compute;
-	struct {
-		GLuint nPixels, windowSize, tick, bound;
-	} shape, main;
+    struct {
+        GLuint nPixels, windowSize, tick, alpha;
+    } compute;
+    struct {
+        GLuint nPixels, windowSize, tick, bound;
+    } shape, main;
 } uniforms;
 
 void init();

@@ -10,27 +10,31 @@
 
 
 void handleEvent(sf::Event& e, sf::Window& w) {
+    /* Closes the window if Escape is pressed */
     if (e.type == sf::Event::Closed ||
             (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::Escape))
         w.close();
 }
 int main(int argc, char *argv[]) {
-	if (argc < 2) {
-		std::cerr << "no file specified" << std::endl;
-		return -1;
-	}
-    // CONSTANTS
+    if (argc < 2) {  // this about covers the user friendlyness of the CLI
+        std::cerr << "no file specified" << std::endl;
+        return -1;
+    }
+
+    // size of device workgroups
     const int local_size = 128;
 
-    // CREATE WINDOW
+    // create window
     sf::Window window(
-        sf::VideoMode::getDesktopMode(), "Voltage", sf::Style::Fullscreen,
+        sf::VideoMode(500, 500), "Voltage", sf::Style::None,
         sf::ContextSettings(8, 8, 4, 4, 4, sf::ContextSettings::Debug)
     );
     window.setMouseCursorVisible(false);
     init();
 
-    // SET UP VERTEX BUFFER AND ARRAY
+    // To render the whole screen, we need the vertices to cover the whole
+    // screen space, in order to apply the fragment shader main.fs to every
+    // pixel.
     const std::vector<float> vertices = {
         -1.0, -1.0,
         1.0, -1.0,
@@ -38,55 +42,94 @@ int main(int argc, char *argv[]) {
         1.0, 1.0
     };
 
-	auto shapeVertices = parseFile(argv[1]);
-	auto bound = getBound(shapeVertices);
+    const auto shapeVertices = parseFile(argv[1]);
+    
+    // find the biggest absolute voltage
+    const auto bound = getBound(shapeVertices);
 
-	initMainProgram();
-	initShapeProgram();
-	initComputeProgram();
+    // load all the shaders, compile the programs
+    // and set up all the uniform locations
+    initMainProgram();
+    initShapeProgram();
+    initComputeProgram();
 
+    // Generate VBOs and VAOs for main (the screen covering rectangle)
+    // and shape
     glGenBuffers(_nVbos, vbos);
     glGenVertexArrays(_nVbos, vaos);
 
-	initMainVertexArray(vertices);
-	initShapeVertexArrays(shapeVertices);
+    initMainVertexArray(vertices);
+    initShapeVertexArrays(shapeVertices);
 
     const int nPixels = window.getSize().x * window.getSize().y;
-    const int nWorkgroups = nPixels / 128;
+    const int nWorkgroups = nPixels / local_size;
 
+    // Initialize the SSBOs
+
+    // Note: Front and Backbuffers
+    // Is is important to update the value of each pixel __after__ computing every
+    // value. Otherwise, depending on the processing order, artefacts will emerge.
+    // This is solved by buffer ping-pong-ing:
+    // The data is stored twice, in a front and a back buffer. In one iteration, one
+    // of them is used for reading while the other is used for writing. With each
+    // iteration, the roles change. This way, there is no need to move large amounts
+    // of memory and everything can be done in-place.
+
+    // In potential, the actual data is stored in a 1D row major representation
+    // Potential contains the front and back buffer end to end, each nPixels in size.
+    // When rendering, judging from current_tick %2 either being 0 or 1, data from the
+    // front is read to update the back buffer, or vice versa.
     BufferObject<GL_SHADER_STORAGE_BUFFER, float> potential(3, 2*nPixels, GL_FLOAT, 0.0f);
+
+    // isStatic is a boolean array over all pixels on the screen in 1D row major
+    // representation. At a given position, iff the entry is true the potential will
+    // not change in neither the back nor front buffer.
+    // Note:
+    //     int is used instead of float because the width of GL_BOOL is 4 on my device.
     BufferObject<GL_SHADER_STORAGE_BUFFER, int> isStatic(4, nPixels, GL_BOOL, 0);
 
-	drawShape(shapeVertices, window);
+    // Draw the shape into the Buffers.
+    drawShape(shapeVertices, window);
 
-    int current_tick = -1;
+    // put vertex buffers back to main, since from this point on only the main
+    // program will render.
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
+    glBindVertexArray(vaos[mainPos]);
+
+    // Main loop
+    
+    // current_tick is used to determine wether to update the front or back buffer.
+    int current_tick = 0;
     sf::Event event;
     while (window.isOpen()) {
         while (window.pollEvent(event))
             handleEvent(event, window);
 
-		glUseProgram(programs.compute);
+        // Set up uniforms for compute shader
+        glUseProgram(programs.compute);
         glUniform2i(uniforms.compute.windowSize,
-			window.getSize().x, window.getSize().y);
+            window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.compute.nPixels, nPixels);
-        glUniform1i(uniforms.compute.tick, ++current_tick % 2);
         glUniform1f(uniforms.compute.alpha, .1);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glDispatchCompute(nWorkgroups, 1, 1);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
+        // update front and back buffer nIterations times in an alternating manner.
+        for (int i = 0; i < 20; ++i) {
+            glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
+            glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
+        }
+
+        // Draw the potential on the screen
         glUseProgram(programs.main);
         glUniform2i(uniforms.main.windowSize,
-			window.getSize().x, window.getSize().y);
+            window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.main.nPixels, nPixels);
         glUniform1i(uniforms.main.tick, current_tick % 2);
-		glUniform1f(uniforms.main.bound, bound);
+        glUniform1f(uniforms.main.bound, bound);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
-        glBindVertexArray(vaos[mainPos]);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size()/2);
 
         window.display();
     }
-	return 0;
+    return 0;  // success yay
 }
