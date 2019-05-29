@@ -15,16 +15,16 @@ void handleEvent(sf::Event& e, sf::Window& w) {
         w.close();
 }
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        std::cerr << "no file specified" << std::endl;
-        return -1;
-    }
+	if (argc < 2) {
+		std::cerr << "no file specified" << std::endl;
+		return -1;
+	}
     // CONSTANTS
     const int local_size = 128;
 
     // CREATE WINDOW
     sf::Window window(
-        sf::VideoMode(1000, 1000), "Voltage", sf::Style::None,
+        sf::VideoMode::getDesktopMode(), "Voltage", sf::Style::Fullscreen,
         sf::ContextSettings(8, 8, 4, 4, 4, sf::ContextSettings::Debug)
     );
     window.setMouseCursorVisible(false);
@@ -38,18 +38,18 @@ int main(int argc, char *argv[]) {
         1.0, 1.0
     };
 
-    auto shapeVertices = parseFile(argv[1]);
-    auto bound = getBound(shapeVertices);
+	auto shapeVertices = parseFile(argv[1]);
+	auto bound = getBound(shapeVertices);
 
-    initMainProgram();
-    initShapeProgram();
-    initComputeProgram();
+	initMainProgram();
+	initShapeProgram();
+	initComputeProgram();
 
     glGenBuffers(_nVbos, vbos);
     glGenVertexArrays(_nVbos, vaos);
 
-    initMainVertexArray(vertices);
-    initShapeVertexArrays(shapeVertices);
+	initMainVertexArray(vertices);
+	initShapeVertexArrays(shapeVertices);
 
     const int nPixels = window.getSize().x * window.getSize().y;
     const int nWorkgroups = nPixels / 128;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     BufferObject<GL_SHADER_STORAGE_BUFFER, float> potential(3, 2*nPixels, GL_FLOAT, 0.0f);
     BufferObject<GL_SHADER_STORAGE_BUFFER, int> isStatic(4, nPixels, GL_BOOL, 0);
 
-    drawShape(shapeVertices, window);
+	drawShape(shapeVertices, window);
 
     int current_tick = -1;
     sf::Event event;
@@ -65,22 +65,22 @@ int main(int argc, char *argv[]) {
         while (window.pollEvent(event))
             handleEvent(event, window);
 
-        glUseProgram(programs.compute);
+		glUseProgram(programs.compute);
         glUniform2i(uniforms.compute.windowSize,
-            window.getSize().x, window.getSize().y);
+			window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.compute.nPixels, nPixels);
+        glUniform1i(uniforms.compute.tick, ++current_tick % 2);
         glUniform1f(uniforms.compute.alpha, .1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glUniform1i(uniforms.compute.tick, ++current_tick % 2);
         glDispatchCompute(nWorkgroups, 1, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
         glUseProgram(programs.main);
         glUniform2i(uniforms.main.windowSize,
-            window.getSize().x, window.getSize().y);
+			window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.main.nPixels, nPixels);
         glUniform1i(uniforms.main.tick, current_tick % 2);
-        glUniform1f(uniforms.main.bound, bound);
+		glUniform1f(uniforms.main.bound, bound);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbos[mainPos]);
         glBindVertexArray(vaos[mainPos]);
@@ -88,6 +88,5 @@ int main(int argc, char *argv[]) {
 
         window.display();
     }
-    std::cout << current_tick << std::endl;
-    return 0;
+	return 0;
 }

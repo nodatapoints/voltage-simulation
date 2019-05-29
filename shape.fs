@@ -14,7 +14,7 @@ in float potential;
 uniform ivec2 windowSize;
 
 void main() {
-    const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
-    data[id] = potential;
+	const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
+	data[id] = potential;
     isStatic[id] = true;
 }

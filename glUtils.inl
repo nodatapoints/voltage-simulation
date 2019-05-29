@@ -11,18 +11,18 @@ class BufferObject {
 public:
     GLuint handle;
     BufferObject(GLuint binding, GLsizei size, GLenum type, const T value) {
-        handle = binding;
+		handle = binding;
 
-        glGenBuffers(1, &handle);
-        glBindBuffer(bufferType, handle);
+		glGenBuffers(1, &handle);
+		glBindBuffer(bufferType, handle);
 
-        glBufferData(bufferType, size*sizeof(T), nullptr, GL_STATIC_DRAW);
-        glClearBufferData(bufferType, GL_R32F, GL_RED, type, &value);
+		glBufferData(bufferType, size*sizeof(T), nullptr, GL_STATIC_DRAW);
+		glClearBufferData(bufferType, GL_R32F, GL_RED, type, &value);
 
-        glBindBufferBase(bufferType, binding, handle);
-    }
+		glBindBufferBase(bufferType, binding, handle);
+	}
     ~BufferObject() { glDeleteBuffers(1, &handle); };
-    operator GLuint() const { return handle; }
+	operator GLuint() const { return handle; }
 };
 
 enum {mainPos, shapePos, shapePotential, _nVbos};
@@ -52,30 +52,30 @@ void initMainVertexArray(const std::vector<float> &vertices) {
 }
 
 void initMainProgram() {
-    auto vert_s = loadShader("main.vs", GL_VERTEX_SHADER);
-    auto frag_s = loadShader("main.fs", GL_FRAGMENT_SHADER);
-    programs.main = linkShaders({vert_s, frag_s});
-    uniforms.main.windowSize = glGetUniformLocation(programs.main, "windowSize");
-    uniforms.main.tick = glGetUniformLocation(programs.main, "tick");
-    uniforms.main.nPixels = glGetUniformLocation(programs.main, "nPixels");
-    uniforms.main.bound = glGetUniformLocation(programs.main, "bound");
+	auto vert_s = loadShader("main.vs", GL_VERTEX_SHADER);
+	auto frag_s = loadShader("main.fs", GL_FRAGMENT_SHADER);
+	programs.main = linkShaders({vert_s, frag_s});
+	uniforms.main.windowSize = glGetUniformLocation(programs.main, "windowSize");
+	uniforms.main.tick = glGetUniformLocation(programs.main, "tick");
+	uniforms.main.nPixels = glGetUniformLocation(programs.main, "nPixels");
+	uniforms.main.bound = glGetUniformLocation(programs.main, "bound");
 }
 
 void initShapeProgram() {
-    auto shapeVert_s = loadShader("shape.vs", GL_VERTEX_SHADER);
-    auto shapeFrag_s = loadShader("shape.fs", GL_FRAGMENT_SHADER);
-    programs.shape = linkShaders({shapeVert_s, shapeFrag_s});
-    uniforms.shape.windowSize = glGetUniformLocation(programs.shape, "windowSize");
-    uniforms.shape.nPixels = glGetUniformLocation(programs.shape, "nPixels");
+	auto shapeVert_s = loadShader("shape.vs", GL_VERTEX_SHADER);
+	auto shapeFrag_s = loadShader("shape.fs", GL_FRAGMENT_SHADER);
+	programs.shape = linkShaders({shapeVert_s, shapeFrag_s});
+	uniforms.shape.windowSize = glGetUniformLocation(programs.shape, "windowSize");
+	uniforms.shape.nPixels = glGetUniformLocation(programs.shape, "nPixels");
 }
 
 void initComputeProgram() {
-    auto comp_s = loadShader("compute.glsl", GL_COMPUTE_SHADER);
-    programs.compute = linkShaders({comp_s});
-    uniforms.compute.windowSize = glGetUniformLocation(programs.compute, "windowSize");
-    uniforms.compute.tick = glGetUniformLocation(programs.compute, "tick");
-    uniforms.compute.nPixels = glGetUniformLocation(programs.compute, "nPixels");
-    uniforms.compute.alpha = glGetUniformLocation(programs.compute, "alpha");
+	auto comp_s = loadShader("compute.glsl", GL_COMPUTE_SHADER);
+	programs.compute = linkShaders({comp_s});
+	uniforms.compute.windowSize = glGetUniformLocation(programs.compute, "windowSize");
+	uniforms.compute.tick = glGetUniformLocation(programs.compute, "tick");
+	uniforms.compute.nPixels = glGetUniformLocation(programs.compute, "nPixels");
+	uniforms.compute.alpha = glGetUniformLocation(programs.compute, "alpha");
 }
 
 void drawShape(const std::vector<PointData> &shapeVertices, const sf::Window &window) {
