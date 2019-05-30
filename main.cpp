@@ -1,6 +1,7 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <unistd.h>
 
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
@@ -15,18 +16,44 @@ void handleEvent(sf::Event& e, sf::Window& w) {
             (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::Escape))
         w.close();
 }
-int main(int argc, char *argv[]) {
-    if (argc < 2) {  // this about covers the user friendlyness of the CLI
-        std::cerr << "no file specified" << std::endl;
-        return -1;
+
+struct {
+    bool fullscreen = false;
+    int equiPotential = 0;
+    int width = 1000;
+    int height = 1000;
+    float alpha = .3;
+    float gamma = 1.25;
+} options;
+
+void parseOptions(int argc, char *argv[]) {
+    char c;
+    while ((c = getopt(argc, argv, "efg:a:w:h:")) != -1) {
+        switch (c) {
+        case 'f': options.fullscreen = true; break;
+        case 'e': options.equiPotential = 1; break;
+        case 'a': options.alpha = atof(optarg); break;
+        case 'g': options.gamma = atof(optarg); break;
+        case 'w': options.width = atof(optarg); break;
+        case 'h': options.height = atof(optarg); break;
+        default: abort();
+        }
     }
+}
+int main(int argc, char *argv[]) {
+    parseOptions(argc, argv);
 
     // size of device workgroups
     const int local_size = 128;
 
     // create window
+    auto videoMode = (options.fullscreen ?
+          sf::VideoMode::getDesktopMode() : sf::VideoMode(options.width, options.height));
+    auto style = (options.fullscreen ? sf::Style::Fullscreen : sf::Style::None);
     sf::Window window(
-        sf::VideoMode(500, 500), "Voltage", sf::Style::None,
+        videoMode,
+        "Voltage",
+        style,
         sf::ContextSettings(8, 8, 4, 4, 4, sf::ContextSettings::Debug)
     );
     window.setMouseCursorVisible(false);
@@ -42,7 +69,7 @@ int main(int argc, char *argv[]) {
         1.0, 1.0
     };
 
-    const auto shapeVertices = parseFile(argv[1]);
+    const auto shapeVertices = parseFile(argv[optind]);
     
     // find the biggest absolute voltage
     const auto bound = getBound(shapeVertices);
@@ -62,7 +89,7 @@ int main(int argc, char *argv[]) {
     initShapeVertexArrays(shapeVertices);
 
     const int nPixels = window.getSize().x * window.getSize().y;
-    const int nWorkgroups = nPixels / local_size;
+    const int nWorkgroups = nPixels / local_size + 1;
 
     // Initialize the SSBOs
 
@@ -101,31 +128,36 @@ int main(int argc, char *argv[]) {
     // current_tick is used to determine wether to update the front or back buffer.
     int current_tick = 0;
     sf::Event event;
+    bool running = true;
     while (window.isOpen()) {
         while (window.pollEvent(event))
             handleEvent(event, window);
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+            running = true;
         // Set up uniforms for compute shader
         glUseProgram(programs.compute);
-        glUniform2i(uniforms.compute.windowSize,
-            window.getSize().x, window.getSize().y);
+        glUniform2i(uniforms.compute.windowSize, window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.compute.nPixels, nPixels);
-        glUniform1f(uniforms.compute.alpha, .1);
+        glUniform1f(uniforms.compute.alpha, options.alpha);
 
         // update front and back buffer nIterations times in an alternating manner.
-        for (int i = 0; i < 20; ++i) {
-            glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
-            glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
+        if (running) {
+            for (int i = 0; i < 20; ++i) {
+                glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
+                glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
+                glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
+            }
         }
 
         // Draw the potential on the screen
         glUseProgram(programs.main);
-        glUniform2i(uniforms.main.windowSize,
-            window.getSize().x, window.getSize().y);
+        glUniform2i(uniforms.main.windowSize, window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.main.nPixels, nPixels);
         glUniform1i(uniforms.main.tick, current_tick % 2);
         glUniform1f(uniforms.main.bound, bound);
+        glUniform1i(uniforms.main.equiPotential, options.equiPotential);
+        glUniform1f(uniforms.main.gamma, options.gamma);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size()/2);
 

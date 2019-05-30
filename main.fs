@@ -10,6 +10,8 @@ uniform ivec2 windowSize;
 uniform float bound;
 uniform int tick;
 uniform int nPixels;
+uniform bool equiPotential;
+uniform float gamma;
 
 out vec4 color;
 
@@ -275,6 +277,12 @@ const vec3 cmap[] = {
 void main() {
     const int id = int(gl_FragCoord.y*windowSize.x + gl_FragCoord.x);
     const float value = data[(1-tick)*nPixels+id];
-    color.rgb = cmap[ int((sign(value)*pow(abs(value/bound), .75)/2+.5) * 255) ];
+    float normalized = 0;
+    if (equiPotential)
+        normalized = pow(1+abs(cos(20*value/bound)), -gamma);
+    else
+        normalized = sign(value)*pow(abs(value/bound), 1/gamma)/2+.5;
+
+    color.rgb = cmap[int(normalized*255)];
     color.a = 1.0f;
 }

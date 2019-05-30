@@ -81,6 +81,8 @@ void initMainProgram() {
     uniforms.main.tick = glGetUniformLocation(programs.main, "tick");
     uniforms.main.nPixels = glGetUniformLocation(programs.main, "nPixels");
     uniforms.main.bound = glGetUniformLocation(programs.main, "bound");
+    uniforms.main.equiPotential = glGetUniformLocation(programs.main, "equiPotential");
+    uniforms.main.gamma = glGetUniformLocation(programs.main, "gamma");
 }
 
 void initShapeProgram() {
@@ -110,4 +112,3 @@ void drawShape(const std::vector<PointData> &shapeVertices, const sf::Window &wi
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-// next time I'll use a C++ Wrapper for GL

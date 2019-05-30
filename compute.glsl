@@ -43,7 +43,7 @@ void main() {
         + potential[base+w]  // under
     );
 
-    if (isStatic[id])
+    if (isStatic[id] || (id % w == w/2) || (id < w*3/2))
         potential[pbase] = potential[base];
     else
         potential[pbase] = alpha*potential[base] + (1-alpha)*average;
