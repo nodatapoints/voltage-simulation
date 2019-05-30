@@ -52,15 +52,11 @@ A.txt:
 ### Parameters
 ##### Relaxation
 To relax the simulation, the values can be smoothed out over time. This enables a more stable but also slower computation. This is done with the alpha parameter, ranging from 0 to 1. Instead of replacing every old value with the computed new value, both are weighted together using the following formula
-<div style="text-align: center">
-    <img src="https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula1.png"/>
-</div>
+![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula0.png)
 ##### Shading
 There are two modes of shading available: _normal_ and _equipotential_. Before shading, the potential is normalized to [-1;1]. This is done by diving by the maximum absolute potential known to be present.
 
 In normal mode, -1 to 1 is mapped onto blue to yellow. The higher the parameter gamma, the sharper the transition of color around 0V. This way, gradients around 0 are displayed in more detail than the steep gradients near the potential sources. The color map is a onedimensional gradient from 0 (blue) to 1 (yellow). The color at a given potential is computed via
-<div style="text-align: center">
-    <img src="https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula2.png"/>
-</div>
+![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula1.png)
 In equipotential mode, only certain evenly distributed voltages in the spectrum are highlighted. The parameter n sets the number of lines, while gamma now sets the 'sharpness'. The greater gamma, the thinner the lines. This can look good on small gradients, but looks pixelated in steep ones. Following formula is used
-$$ v_{col} = \left(1+|\cos(\pi\cdot n\cdot \Phi_{norm})|\right)^{-\gamma} $$
+![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula2.png)
