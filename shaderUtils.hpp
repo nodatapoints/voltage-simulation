@@ -14,7 +14,7 @@ struct {
 
 struct {
     struct {
-        GLuint nPixels, windowSize, tick, omega;
+        GLuint nPixels, windowSize, tick, alpha;
     } compute;
     struct {
         GLuint nPixels, windowSize;

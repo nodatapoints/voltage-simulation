@@ -100,7 +100,7 @@ void initComputeProgram() {
     uniforms.compute.windowSize = glGetUniformLocation(programs.compute, "windowSize");
     uniforms.compute.tick = glGetUniformLocation(programs.compute, "tick");
     uniforms.compute.nPixels = glGetUniformLocation(programs.compute, "nPixels");
-    uniforms.compute.omega = glGetUniformLocation(programs.compute, "omega");
+    uniforms.compute.alpha = glGetUniformLocation(programs.compute, "alpha");
 }
 
 void drawShape(const std::vector<PointData> &shapeVertices, const sf::Window &window) {
