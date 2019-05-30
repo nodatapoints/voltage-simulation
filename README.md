@@ -1,8 +1,8 @@
 # Voltage Simulation
 A GLSL powered voltage simulation using a numerical implementation of the Laplace equation
-<div style="text-align: center">
-    <img src="https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/title.gif"/>
-</div>
+
+![cool gif of it working](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/title.gif")
+
 ### Installation
 This code is expected to run on a GL-enabled linux machine with `g++` installed. Additionally, having a GPU makes it more fun.<br>
 Install the required packages
@@ -58,5 +58,6 @@ There are two modes of shading available: _normal_ and _equipotential_. Before s
 
 In normal mode, -1 to 1 is mapped onto blue to yellow. The higher the parameter gamma, the sharper the transition of color around 0V. This way, gradients around 0 are displayed in more detail than the steep gradients near the potential sources. The color map is a onedimensional gradient from 0 (blue) to 1 (yellow). The color at a given potential is computed via
 ![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula1.png)
+
 In equipotential mode, only certain evenly distributed voltages in the spectrum are highlighted. The parameter n sets the number of lines, while gamma now sets the 'sharpness'. The greater gamma, the thinner the lines. This can look good on small gradients, but looks pixelated in steep ones. Following formula is used
 ![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula2.png)
