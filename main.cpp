@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     // current_tick is used to determine wether to update the front or back buffer.
     int current_tick = 0;
     sf::Event event;
-    bool running = true;
+    bool running = false;
     while (window.isOpen()) {
         while (window.pollEvent(event))
             handleEvent(event, window);
