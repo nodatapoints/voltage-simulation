@@ -20,7 +20,7 @@ struct {
         GLuint nPixels, windowSize;
     } shape;
     struct {
-        GLuint nPixels, windowSize, tick, bound, equiPotential, gamma;
+        GLuint nPixels, windowSize, tick, bound, equiPotential, gamma, n;
     } main;
 } uniforms;
 

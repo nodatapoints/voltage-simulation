@@ -83,6 +83,7 @@ void initMainProgram() {
     uniforms.main.bound = glGetUniformLocation(programs.main, "bound");
     uniforms.main.equiPotential = glGetUniformLocation(programs.main, "equiPotential");
     uniforms.main.gamma = glGetUniformLocation(programs.main, "gamma");
+    uniforms.main.n = glGetUniformLocation(programs.main, "n");
 }
 
 void initShapeProgram() {

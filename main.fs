@@ -12,9 +12,11 @@ uniform int tick;
 uniform int nPixels;
 uniform bool equiPotential;
 uniform float gamma;
+uniform int n;
 
 out vec4 color;
 
+const float pi = 3.1415926f;
 const vec3 cmap[] = {
     vec3(0.050383, 0.029803, 0.527975),
     vec3(0.063536, 0.028426, 0.533124),
@@ -279,7 +281,7 @@ void main() {
     const float value = data[(1-tick)*nPixels+id];
     float normalized = 0;
     if (equiPotential)
-        normalized = pow(1+abs(cos(20*value/bound)), -gamma);
+        normalized = pow(1+abs(cos(pi*n*value/bound)), -gamma);
     else
         normalized = sign(value)*pow(abs(value/bound), 1/gamma)/2+.5;
 

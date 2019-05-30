@@ -24,11 +24,12 @@ struct {
     int height = 1000;
     float alpha = .3;
     float gamma = 1.25;
+    int n = 20;
 } options;
 
 void parseOptions(int argc, char *argv[]) {
     char c;
-    while ((c = getopt(argc, argv, "efg:a:w:h:")) != -1) {
+    while ((c = getopt(argc, argv, "efg:a:w:h:n:")) != -1) {
         switch (c) {
         case 'f': options.fullscreen = true; break;
         case 'e': options.equiPotential = 1; break;
@@ -36,6 +37,7 @@ void parseOptions(int argc, char *argv[]) {
         case 'g': options.gamma = atof(optarg); break;
         case 'w': options.width = atof(optarg); break;
         case 'h': options.height = atof(optarg); break;
+        case 'n': options.n = atof(optarg); break;
         default: abort();
         }
     }
@@ -158,6 +160,7 @@ int main(int argc, char *argv[]) {
         glUniform1f(uniforms.main.bound, bound);
         glUniform1i(uniforms.main.equiPotential, options.equiPotential);
         glUniform1f(uniforms.main.gamma, options.gamma);
+        glUniform1i(uniforms.main.n, options.n);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size()/2);
 
