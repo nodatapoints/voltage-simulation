@@ -1,7 +1,7 @@
 # Voltage Simulation
 A GLSL powered voltage simulation using a numerical implementation of the Laplace equation
 
-![cool gif of it working](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/title.gif")
+![cool gif of it working](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/title.gif)
 
 ### Installation
 This code is expected to run on a GL-enabled linux machine with `g++` installed. Additionally, having a GPU makes it more fun.<br>
