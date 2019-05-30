@@ -1,3 +1,7 @@
+/* Fragment shader for displaying the potential
+ * as colors on the screen.
+ */
+
 #version 440
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
@@ -17,6 +21,12 @@ uniform int n;
 out vec4 color;
 
 const float pi = 3.1415926f;
+
+// self defined color map "plasma"
+// stolen from matplotlib
+
+// Don't give me that look --
+// lookup tables are fast and looks pretty!
 const vec3 cmap[] = {
     vec3(0.050383, 0.029803, 0.527975),
     vec3(0.063536, 0.028426, 0.533124),
