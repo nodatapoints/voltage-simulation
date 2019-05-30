@@ -22,7 +22,7 @@ struct {
     int equiPotential = 0;
     int width = 1000;
     int height = 1000;
-    float alpha = .3;
+    float omega = .3;
     float gamma = 1.25;
     int n = 20;
 } options;
@@ -33,7 +33,7 @@ void parseOptions(int argc, char *argv[]) {
         switch (c) {
         case 'f': options.fullscreen = true; break;
         case 'e': options.equiPotential = 1; break;
-        case 'a': options.alpha = atof(optarg); break;
+        case 'a': options.omega = atof(optarg); break;
         case 'g': options.gamma = atof(optarg); break;
         case 'w': options.width = atof(optarg); break;
         case 'h': options.height = atof(optarg); break;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
         glUseProgram(programs.compute);
         glUniform2i(uniforms.compute.windowSize, window.getSize().x, window.getSize().y);
         glUniform1i(uniforms.compute.nPixels, nPixels);
-        glUniform1f(uniforms.compute.alpha, options.alpha);
+        glUniform1f(uniforms.compute.omega, options.omega);
 
         // update front and back buffer nIterations times in an alternating manner.
         if (running) {

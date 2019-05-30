@@ -18,7 +18,7 @@ layout(std430, binding=4) buffer b2 {
 
 uniform ivec2 windowSize;
 uniform int nPixels, tick;
-uniform float alpha;
+uniform float omega;
 
 void main() {
     const int w = windowSize.x;
@@ -46,5 +46,5 @@ void main() {
     if (isStatic[id] || (id % w == w/2) || (id < w*3/2))
         potential[pbase] = potential[base];
     else
-        potential[pbase] = alpha*potential[base] + (1-alpha)*average;
+        potential[pbase] = omega*potential[base] + (1-omega)*average;
 }
