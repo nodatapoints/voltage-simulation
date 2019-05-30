@@ -17,9 +17,11 @@ voltage-simulation$ make
 that's it.
 
 ## Usage
+To simulate a setting defined in a file, use
 ```
 ./volt [OPTIONS] [FILE]
 ```
+**Important:** the binary needs to be executed from the source foulder in order to load the shaders.
 | Option       | Type    | Description                                                              |
 |:------------:|:-------:| --------------------------------------------------------------------     |
 | `-a <value>` | `float` | alpha parameter. Used to relax the simulation. (_see Parameters_)        |
