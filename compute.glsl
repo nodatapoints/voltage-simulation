@@ -25,6 +25,10 @@ void main() {
 
     // id is the index of the position the current invocation is
     // assigned to. It ranges from 0 to nPixels-1 to cover the screen.
+    // 
+    // -- or at least that's how it's supposed to be.
+    // Actually it starts at w/2 and I have no idea why. But it works, so
+    // I just roll with it and pretend like it's fine.
     const int id = int(gl_GlobalInvocationID.x);
 
     // base is index of the original pixel, while pbase is the
@@ -43,6 +47,9 @@ void main() {
         + potential[base+w]  // under
     );
 
+    // when it's static or the left or top edge of the screen
+    // bottom and right are not needed since it just wraps around with
+    // the 1D layout
     if (isStatic[id] || (id % w == w/2) || (id < w*3/2))
         potential[pbase] = potential[base];
     else
