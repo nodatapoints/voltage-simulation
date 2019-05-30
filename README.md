@@ -20,15 +20,15 @@ that's it.
 ```
 ./volt [OPTIONS] [FILE]
 ```
-| Option       | Type    | Description                                                          |
-|:------------:|:-------:| -------------------------------------------------------------------- |
-| `-a <value>` | `float` | alpha parameter. Used to relax the simulation. (_see Parameters_)    |
-| `-g <value>` | `float` | gamma parameter. Used to (_see Parameters_)                          |
-| `-e`         |         | Display equipotential lines instead of the absolute potential        |
-| `-n <value>` | `int`   | Number of lines between 0V and the maximum absolute potential        |
-| `-w <value>` | `int`   | Width of the window                                                  |
-| `-h <value>` | `int`   | Height of the window                                                 |
-| `-f`         |         | Display fullscreen                                                   |
+| Option       | Type    | Description                                                              |
+|:------------:|:-------:| --------------------------------------------------------------------     |
+| `-a <value>` | `float` | alpha parameter. Used to relax the simulation. (_see Parameters_)        |
+| `-g <value>` | `float` | gamma parameter. Used to sharpen the color transitions (_see Parameters_)|
+| `-e`         |         | Display equipotential lines instead of the absolute potential            |
+| `-n <value>` | `int`   | Number of lines between 0V and the maximum absolute potential            |
+| `-w <value>` | `int`   | Width of the window                                                      |
+| `-h <value>` | `int`   | Height of the window                                                     |
+| `-f`         |         | Display fullscreen                                                       |
 ### File Format
 The file given in `[FILE]` is a text file containing a list of coordinates with voltages. Each line contains a triplet of float values. The first value is the potential assigned to a vertex, the remaining two the $xy$-position of said vertex.
 ```
