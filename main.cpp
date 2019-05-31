@@ -25,9 +25,10 @@ struct {
     float alpha = .3;
     float gamma = 1.25;
     int n = 20;
+    int i = 200;
 } options;
 
-void parseOptions(int argc, char *argv[]) {
+int parseOptions(int argc, char *argv[]) {
     char c;
     while ((c = getopt(argc, argv, "efg:a:w:h:n:")) != -1) {
         switch (c) {
@@ -38,12 +39,29 @@ void parseOptions(int argc, char *argv[]) {
         case 'w': options.width = atof(optarg); break;
         case 'h': options.height = atof(optarg); break;
         case 'n': options.n = atof(optarg); break;
-        default: abort();
+        case 'i': options.i = atof(optarg); break;
+        default: 
+                  std::cout << "\
+USAGE  ./volt [OPTIONS] [FILE]\n\n\
+OPTIONS\n\
+NAME         TYPE   DESCRIPTION\n\
+-a <value>   float  alpha parameter. Used to relax the simulation\n\
+-g <value>   float  gamma parameter. Used to sharpen the color transitions\n\
+-e                  Display equipotential lines instead of the absolute potential\n\
+-n <value>   int    Number of lines between 0V and the maximum absolute potential\n\
+-i <value>   int    Number of iterations per frame\n\
+-w <value>   int    Width of the window\n\
+-h <value>   int    Height of the window\n\
+-f                  Display fullscreen\n\n\
+see README.md for more information.\n";
+                  return -1;
         }
     }
+    return 0;
 }
 int main(int argc, char *argv[]) {
-    parseOptions(argc, argv);
+    if (parseOptions(argc, argv) < 0)
+        return -1;
 
     // size of device workgroups
     const int local_size = 128;
@@ -130,13 +148,10 @@ int main(int argc, char *argv[]) {
     // current_tick is used to determine wether to update the front or back buffer.
     int current_tick = 0;
     sf::Event event;
-    bool running = false;
     while (window.isOpen()) {
         while (window.pollEvent(event))
             handleEvent(event, window);
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
-            running = true;
         // Set up uniforms for compute shader
         glUseProgram(programs.compute);
         glUniform2i(uniforms.compute.windowSize, window.getSize().x, window.getSize().y);
@@ -144,12 +159,10 @@ int main(int argc, char *argv[]) {
         glUniform1f(uniforms.compute.alpha, options.alpha);
 
         // update front and back buffer nIterations times in an alternating manner.
-        if (running) {
-            for (int i = 0; i < 20; ++i) {
-                glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
-                glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
-                glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
-            }
+        for (int i = 0; i < options.i; ++i) {
+            glUniform1i(uniforms.compute.tick, (current_tick++) % 2);  // update tick
+            glDispatchCompute(nWorkgroups, 1, 1);  // actually do the computation
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);  // to prevent data races
         }
 
         // Draw the potential on the screen
