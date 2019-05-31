@@ -4,10 +4,10 @@ A GLSL powered voltage simulation using a numerical implementation of the Laplac
 ![cool gif of it working](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/title.gif)
 
 ### Installation
-This code is expected to run on a GL-enabled linux machine with `g++` installed. Additionally, having a GPU makes it more fun.<br>
+This code is expected to run on a linux machine with `g++` installed and GL version `>=4.4`. Additionally, having a GPU makes it more fun.<br>
 Install the required packages
 ```
-$ sudo apt install libsfml-dev libgl1-mesa-dev libglew-dev
+$ sudo apt install make libsfml-dev libgl1-mesa-dev libglew-dev
 ```
 Make
 ```
@@ -24,10 +24,11 @@ To simulate a setting defined in a file, use
 **Important:** the binary needs to be executed from the source foulder in order to load the shaders.
 | Option       | Type    | Description                                                              |
 |:------------:|:-------:| --------------------------------------------------------------------     |
-| `-a <value>` | `float` | alpha parameter. Used to relax the simulation. (_see Parameters_)        |
+| `-a <value>` | `float` | alpha parameter. Used to relax the simulation (_see Parameters_)         |
 | `-g <value>` | `float` | gamma parameter. Used to sharpen the color transitions (_see Parameters_)|
 | `-e`         |         | Display equipotential lines instead of the absolute potential            |
 | `-n <value>` | `int`   | Number of lines between 0V and the maximum absolute potential            |
+| `-i <value>` | `int`   | Number of iterations per frame                                           |
 | `-w <value>` | `int`   | Width of the window                                                      |
 | `-h <value>` | `int`   | Height of the window                                                     |
 | `-f`         |         | Display fullscreen                                                       |
