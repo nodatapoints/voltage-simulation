@@ -22,16 +22,16 @@ To simulate a setting defined in a file, use
 ./volt [OPTIONS] [FILE]
 ```
 **Important:** the binary needs to be executed from the source foulder in order to load the shaders.
-| Option       | Type    | Description                                                              |
-|:------------:|:-------:| --------------------------------------------------------------------     |
-| `-a <value>` | `float` | alpha parameter. Used to relax the simulation (_see Parameters_)         |
-| `-g <value>` | `float` | gamma parameter. Used to sharpen the color transitions (_see Parameters_)|
-| `-e`         |         | Display equipotential lines instead of the absolute potential            |
-| `-n <value>` | `int`   | Number of lines between 0V and the maximum absolute potential            |
-| `-i <value>` | `int`   | Number of iterations per frame                                           |
-| `-w <value>` | `int`   | Width of the window                                                      |
-| `-h <value>` | `int`   | Height of the window                                                     |
-| `-f`         |         | Display fullscreen                                                       |
+| Option       | Type    | Description                                                               |
+|:------------:|:-------:| --------------------------------------------------------------------------|
+| `-a <value>` | `float` | alpha parameter. Used to relax the simulation (_see Parameters_)          |
+| `-g <value>` | `float` | gamma parameter. Used to sharpen the color transitions (_see Parameters_) |
+| `-e`         |         | Display equipotential lines instead of the absolute potential             |
+| `-n <value>` | `int`   | Number of lines between 0V and the maximum absolute potential             |
+| `-i <value>` | `int`   | Number of iterations per frame                                            |
+| `-w <value>` | `int`   | Width of the window                                                       |
+| `-h <value>` | `int`   | Height of the window                                                      |
+| `-f`         |         | Display fullscreen                                                        |
 ### File Format
 The file given in `[FILE]` is a text file containing a list of coordinates with voltages. Each line contains a triplet of float values. The first value is the potential assigned to a vertex, the remaining two the $xy$-position of said vertex.
 ```
