@@ -59,7 +59,7 @@ A.txt:
 To relax the simulation, the values can be smoothed out over time. This enables a more stable but also slower computation. This is done with the alpha parameter, ranging from 0 to 1. Instead of replacing every old value with the computed new value, both are weighted together using the following formula
 ![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula0.png)
 ##### Shading
-There are two modes of shading available: _normal_ and _equipotential_. Before shading, the potential is normalized to [-1;1]. This is done by diving by the maximum absolute potential known to be present.
+There are two modes of shading available: _normal_ and _equipotential_. Before shading, the potential is normalized to [-1;1]. This is done by dividing by the maximum absolute potential known to be present.
 
 In normal mode, -1 to 1 is mapped onto blue to yellow. The higher the parameter gamma, the sharper the transition of color around 0V. This way, gradients around 0 are displayed in more detail than the steep gradients near the potential sources. The color map is a onedimensional gradient from 0 (blue) to 1 (yellow). The color at a given potential is computed via
 ![](https://raw.githubusercontent.com/nodatapoints/voltage-simulation/master/doc/img/formula1.png)
